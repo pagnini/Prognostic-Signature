@@ -1,0 +1,30 @@
+library(foreign)
+library(survival)
+library(grid)
+library(lattice)
+library(Formula)
+library(ggplot2) 
+library(Hmisc)
+library(SparseM)
+library(rms)
+library(pROC)
+library("timeROC")
+library(ggplot2)
+library("survminer")
+TR<-read.spss("inputfile.sav")   
+TR<-as.data.frame(TR)
+dd<-datadist(TR)
+options(datadist="dd")
+f<-cph(Surv(survival_time,status)~T+N+riskScore,x=T,y=T,data=TR,surv=T,time.inc = 12)
+surv<-Survival(f)
+surv1<-function(x)surv(12,x)
+surv2<-function(x)surv(36,x)
+surv3<-function(x)surv(60,x)
+nom<-nomogram(f,fun=list(surv1,surv2,surv3),lp=F,
+              funlabel=c('1-year Survival probability',
+                         '3-year Survival probability',
+                         '5-year Survival probability'),
+              maxscale=100,
+              fun.at=c("0.9","0.80","0.70","0.6","0.5","0.4","0.3","0.2","0.1"))
+plot(nom,lwd=2,lty=1)
+rcorrcens(Surv(survival_time,status) ~ predict(f), data =TR)
